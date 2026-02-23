@@ -1094,13 +1094,21 @@
   function initShareAndPdfActions() {
     const baseUrl = getLandingPageUrl();
     const encodedUrl = encodeURIComponent(baseUrl);
-    const shareTextRaw = `${SITE.title} — ${SITE.subtitle}`;
+    const shareTextRaw =
+      "Keluarga Besar MUSLIM RUHR ✨🌙 Mempersembahkan: 📣 BAZAR IDUL FITRI 📣 " +
+      "Assalamu’alaikum Warahmatullahi Wabarakatuh, Mari meriahkan momen Lebaran Idul Fitri kali ini dengan suka cita! 🎉 " +
+      "Punya usaha kuliner sedap atau resep masakan enak (seperti hidangan Bakso yang menggugah selera 🍲, kue kering, minuman segar), " +
+      "cendramata, souvenir atau produk lainnya? Inilah saat yang tepat! Yuk, buka stand bazar kamu di acara kami! " +
+      "Cari rezeki yang halal, jual produkmu, dan raih berkah silaturahmi bersama seluruh warga Muslim Ruhr. 🤝🕌 " +
+      "⚠️ SEGERA DAFTAR!!! ⚠️ Jangan sampai kehabisan, karena ★ TEMPAT TERBATAS ★ Informasi Pendaftaran:";
+    const shareTextWithUrl = `${shareTextRaw} ${baseUrl}`;
     const encodedText = encodeURIComponent(shareTextRaw);
+    const encodedTextWithUrl = encodeURIComponent(shareTextWithUrl);
 
     function openShare(network) {
       let shareUrl = "";
       if (network === "whatsapp") {
-        shareUrl = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+        shareUrl = `https://wa.me/?text=${encodedTextWithUrl}`;
       } else if (network === "telegram") {
         shareUrl = `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
       } else if (network === "facebook") {
