@@ -8,7 +8,7 @@
   const STALLS = [
     {
       label: "Muslim Ruhr Mempersembahkan",
-      title: "Bazar Jajanan Pasar Indonesia",
+      title: "Bazar Jajanan Indonesia",
       subtitle: "Makanan, Minuman segar, Cendramata dan jajanan khar tanah air favorit keluarga.",
       description:
         "Buka booth Jualan/bisnis Anda di area paling ramai pengunjung. Cocok untuk souvenir, makanan menu manis, gurih, dan minuman kekinian saat momen lebaran.",
