@@ -812,6 +812,7 @@
 
   function scrollToSectionIndex(index) {
     const safeIndex = clamp(index, 0, sectionElements.length - 1);
+    const isLastTarget = safeIndex === sectionElements.length - 1;
     const target = sectionElements[safeIndex];
     if (!target) return;
     pagingLock = true;
@@ -821,6 +822,7 @@
     });
     window.setTimeout(() => {
       pagingLock = false;
+      if (isLastTarget) return;
       const nearestIndex = getClosestSectionIndex();
       const nearest = sectionElements[nearestIndex];
       if (nearest) {
@@ -836,6 +838,19 @@
     const nextIndex = clamp(activeIndex + dir, 0, sectionElements.length - 1);
     if (nextIndex === activeIndex) return;
     scrollToSectionIndex(nextIndex);
+  }
+
+  function getLastSectionEdgeState() {
+    const lastIndex = sectionElements.length - 1;
+    if (activeIndex !== lastIndex || lastIndex < 0) return null;
+    const lastSection = sectionElements[lastIndex];
+    if (!lastSection) return null;
+    const rect = lastSection.getBoundingClientRect();
+    const viewportH = window.innerHeight || 0;
+    return {
+      atTop: rect.top >= -2,
+      atBottom: rect.bottom <= viewportH + 2
+    };
   }
 
   function updateTopbarVisibility() {
@@ -951,6 +966,7 @@
       snapTimer = window.setTimeout(() => {
         if (pagingLock) return;
         const { idx, dist } = getClosestToViewportCenter();
+        if (idx === sectionElements.length - 1) return;
         const viewportH = window.innerHeight || 1;
         // If section center is not close enough to viewport center, force align.
         if (dist > viewportH * 0.04) {
@@ -983,6 +999,13 @@
       (event) => {
         registerActivity();
         if (Math.abs(event.deltaY) < 8) return;
+        const lastEdge = getLastSectionEdgeState();
+        if (
+          lastEdge &&
+          ((event.deltaY > 0 && !lastEdge.atBottom) || (event.deltaY < 0 && !lastEdge.atTop))
+        ) {
+          return;
+        }
         event.preventDefault();
         stepSection(event.deltaY > 0 ? 1 : -1);
       },
@@ -1011,6 +1034,13 @@
         touchStartY = null;
         touchStartX = null;
         if (Math.abs(diffY) < 42 || Math.abs(diffY) <= Math.abs(diffX)) return;
+        const lastEdge = getLastSectionEdgeState();
+        if (
+          lastEdge &&
+          ((diffY > 0 && !lastEdge.atBottom) || (diffY < 0 && !lastEdge.atTop))
+        ) {
+          return;
+        }
         stepSection(diffY > 0 ? 1 : -1);
       },
       { passive: true }
@@ -1019,10 +1049,13 @@
     window.addEventListener("keydown", (event) => {
       registerActivity();
       if (event.defaultPrevented) return;
+      const lastEdge = getLastSectionEdgeState();
       if (event.key === "ArrowDown" || event.key === "PageDown" || event.key === " ") {
+        if (lastEdge && !lastEdge.atBottom) return;
         event.preventDefault();
         stepSection(1);
       } else if (event.key === "ArrowUp" || event.key === "PageUp") {
+        if (lastEdge && !lastEdge.atTop) return;
         event.preventDefault();
         stepSection(-1);
       } else if (event.key === "Home") {
