@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bazaar Marketplace — Idul Fitri Festival 2026</title>
+    <meta
+      name="description"
+      content="Bazaar Marketplace — Idul Fitri Festival 2026. Daftarkan stall Anda untuk meramaikan festival."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="is-loading">
+    <div id="loadingScreen" class="loading-screen" role="status" aria-live="polite">
+      <div class="loading-card">
+        <strong class="loading-title">Bazaar Marketplace</strong>
+        <span id="loadingText" class="loading-text">Menyiapkan halaman...</span>
+        <div class="loading-bar" aria-hidden="true">
+          <span id="loadingBarFill" class="loading-bar-fill"></span>
+        </div>
+        <span id="loadingPercent" class="loading-percent">0%</span>
+      </div>
+    </div>
+
+    <header class="topbar" aria-label="Header Bazaar Marketplace">
+      <a class="brand" href="#section-0" aria-label="Bazaar Marketplace">
+        <span class="brand-badge">BM</span>
+        <span class="brand-text">
+          <strong id="siteTitle">Bazaar Marketplace</strong>
+          <small id="siteSubtitle">Idul Fitri Festival 2026</small>
+        </span>
+      </a>
+      <a
+        id="ctaTop"
+        class="cta-btn"
+        href="https://forms.gle/REPLACE_ME"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Daftarkan Usaha
+      </a>
+    </header>
+
+    <main id="app" aria-live="polite"></main>
+
+    <aside id="gerobak" aria-hidden="true">
+      <img src="assets/gerobak-bakso.png" alt="Gerobak Bakso" />
+    </aside>
+
+    <nav id="navDots" class="nav-dots" aria-label="Navigasi section"></nav>
+
+    <button id="backToTop" class="back-to-top" type="button" aria-label="Kembali ke atas">
+      Kembali ke Atas
+    </button>
+
+    <script src="data/stalls.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
