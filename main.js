@@ -61,6 +61,327 @@
     return Math.min(Math.max(value, min), max);
   }
 
+  function createQrMatrixV3L(text) {
+    const encoder = new TextEncoder();
+    const input = encoder.encode(String(text || ""));
+    const maxBytes = 53;
+    if (!input.length || input.length > maxBytes) return null;
+
+    const dataCodewordsCount = 55;
+    const eccCodewordsCount = 15;
+    const size = 29;
+    const alignCenter = 22;
+
+    const bits = [];
+    bits.push(0, 1, 0, 0);
+    for (let i = 7; i >= 0; i -= 1) bits.push((input.length >> i) & 1);
+    for (const b of input) {
+      for (let i = 7; i >= 0; i -= 1) bits.push((b >> i) & 1);
+    }
+    const maxDataBits = dataCodewordsCount * 8;
+    const terminator = Math.min(4, maxDataBits - bits.length);
+    for (let i = 0; i < terminator; i += 1) bits.push(0);
+    while (bits.length % 8 !== 0) bits.push(0);
+
+    const data = [];
+    for (let i = 0; i < bits.length; i += 8) {
+      let v = 0;
+      for (let j = 0; j < 8; j += 1) v = (v << 1) | bits[i + j];
+      data.push(v);
+    }
+    const pads = [0xec, 0x11];
+    for (let i = data.length; i < dataCodewordsCount; i += 1) data.push(pads[i % 2]);
+
+    const gfExp = new Uint16Array(512);
+    const gfLog = new Uint16Array(256);
+    let x = 1;
+    for (let i = 0; i < 255; i += 1) {
+      gfExp[i] = x;
+      gfLog[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11d;
+    }
+    for (let i = 255; i < 512; i += 1) gfExp[i] = gfExp[i - 255];
+    const gfMul = (a, b) => {
+      if (a === 0 || b === 0) return 0;
+      return gfExp[gfLog[a] + gfLog[b]];
+    };
+
+    const polyMul = (a, b) => {
+      const out = new Array(a.length + b.length - 1).fill(0);
+      for (let i = 0; i < a.length; i += 1) {
+        for (let j = 0; j < b.length; j += 1) {
+          out[i + j] ^= gfMul(a[i], b[j]);
+        }
+      }
+      return out;
+    };
+
+    let gen = [1];
+    for (let i = 0; i < eccCodewordsCount; i += 1) {
+      gen = polyMul(gen, [1, gfExp[i]]);
+    }
+
+    const msg = data.concat(new Array(eccCodewordsCount).fill(0));
+    for (let i = 0; i < data.length; i += 1) {
+      const coef = msg[i];
+      if (coef === 0) continue;
+      for (let j = 0; j < gen.length; j += 1) {
+        msg[i + j] ^= gfMul(gen[j], coef);
+      }
+    }
+    const codewords = data.concat(msg.slice(msg.length - eccCodewordsCount));
+
+    const modules = Array.from({ length: size }, () => Array(size).fill(null));
+    const isFn = Array.from({ length: size }, () => Array(size).fill(false));
+    const setFn = (r, c, dark) => {
+      if (r < 0 || c < 0 || r >= size || c >= size) return;
+      modules[r][c] = !!dark;
+      isFn[r][c] = true;
+    };
+
+    const drawFinder = (r, c) => {
+      for (let y = -1; y <= 7; y += 1) {
+        for (let x2 = -1; x2 <= 7; x2 += 1) {
+          const rr = r + y;
+          const cc = c + x2;
+          if (rr < 0 || cc < 0 || rr >= size || cc >= size) continue;
+          const border = y === -1 || y === 7 || x2 === -1 || x2 === 7;
+          const ring = y === 0 || y === 6 || x2 === 0 || x2 === 6;
+          const core = y >= 2 && y <= 4 && x2 >= 2 && x2 <= 4;
+          setFn(rr, cc, !border && (ring || core));
+        }
+      }
+    };
+
+    const drawAlign = (centerR, centerC) => {
+      for (let y = -2; y <= 2; y += 1) {
+        for (let x2 = -2; x2 <= 2; x2 += 1) {
+          const rr = centerR + y;
+          const cc = centerC + x2;
+          const border = Math.abs(y) === 2 || Math.abs(x2) === 2;
+          const dot = y === 0 && x2 === 0;
+          setFn(rr, cc, border || dot);
+        }
+      }
+    };
+
+    drawFinder(0, 0);
+    drawFinder(0, size - 7);
+    drawFinder(size - 7, 0);
+    drawAlign(alignCenter, alignCenter);
+
+    for (let i = 8; i < size - 8; i += 1) {
+      setFn(6, i, i % 2 === 0);
+      setFn(i, 6, i % 2 === 0);
+    }
+    setFn(size - 8, 8, true);
+
+    for (let i = 0; i < 9; i += 1) {
+      if (i !== 6) {
+        setFn(8, i, false);
+        setFn(i, 8, false);
+      }
+    }
+    for (let i = size - 8; i < size; i += 1) {
+      setFn(8, i, false);
+      setFn(i, 8, false);
+    }
+
+    const bitStream = [];
+    for (const cw of codewords) {
+      for (let i = 7; i >= 0; i -= 1) bitStream.push((cw >> i) & 1);
+    }
+
+    let bitIdx = 0;
+    let upward = true;
+    for (let col = size - 1; col > 0; col -= 2) {
+      if (col === 6) col -= 1;
+      for (let rowStep = 0; rowStep < size; rowStep += 1) {
+        const row = upward ? size - 1 - rowStep : rowStep;
+        for (let offset = 0; offset < 2; offset += 1) {
+          const c = col - offset;
+          if (isFn[row][c]) continue;
+          modules[row][c] = bitIdx < bitStream.length ? bitStream[bitIdx] === 1 : false;
+          bitIdx += 1;
+        }
+      }
+      upward = !upward;
+    }
+
+    const maskFns = [
+      (r, c) => (r + c) % 2 === 0,
+      (r, c) => r % 2 === 0,
+      (r, c) => c % 3 === 0,
+      (r, c) => (r + c) % 3 === 0,
+      (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0,
+      (r, c) => ((r * c) % 2) + ((r * c) % 3) === 0,
+      (r, c) => (((r * c) % 2) + ((r * c) % 3)) % 2 === 0,
+      (r, c) => (((r + c) % 2) + ((r * c) % 3)) % 2 === 0
+    ];
+
+    const calcPenalty = (grid) => {
+      let p = 0;
+      for (let r = 0; r < size; r += 1) {
+        let runColor = grid[r][0];
+        let runLen = 1;
+        for (let c = 1; c < size; c += 1) {
+          if (grid[r][c] === runColor) runLen += 1;
+          else {
+            if (runLen >= 5) p += 3 + (runLen - 5);
+            runColor = grid[r][c];
+            runLen = 1;
+          }
+        }
+        if (runLen >= 5) p += 3 + (runLen - 5);
+      }
+      for (let c = 0; c < size; c += 1) {
+        let runColor = grid[0][c];
+        let runLen = 1;
+        for (let r = 1; r < size; r += 1) {
+          if (grid[r][c] === runColor) runLen += 1;
+          else {
+            if (runLen >= 5) p += 3 + (runLen - 5);
+            runColor = grid[r][c];
+            runLen = 1;
+          }
+        }
+        if (runLen >= 5) p += 3 + (runLen - 5);
+      }
+      for (let r = 0; r < size - 1; r += 1) {
+        for (let c = 0; c < size - 1; c += 1) {
+          const v = grid[r][c];
+          if (v === grid[r][c + 1] && v === grid[r + 1][c] && v === grid[r + 1][c + 1]) p += 3;
+        }
+      }
+      const isFinderLike = (arr, i) =>
+        arr[i] &&
+        !arr[i + 1] &&
+        arr[i + 2] &&
+        arr[i + 3] &&
+        arr[i + 4] &&
+        !arr[i + 5] &&
+        arr[i + 6] &&
+        !arr[i + 7] &&
+        !arr[i + 8] &&
+        !arr[i + 9] &&
+        !arr[i + 10];
+      for (let r = 0; r < size; r += 1) {
+        const row = grid[r];
+        for (let i = 0; i <= size - 11; i += 1) {
+          if (isFinderLike(row, i) || isFinderLike([...row].reverse(), size - 11 - i)) p += 40;
+        }
+      }
+      for (let c = 0; c < size; c += 1) {
+        const col = [];
+        for (let r = 0; r < size; r += 1) col.push(grid[r][c]);
+        for (let i = 0; i <= size - 11; i += 1) {
+          if (isFinderLike(col, i) || isFinderLike([...col].reverse(), size - 11 - i)) p += 40;
+        }
+      }
+      let dark = 0;
+      for (let r = 0; r < size; r += 1) for (let c = 0; c < size; c += 1) if (grid[r][c]) dark += 1;
+      const total = size * size;
+      const k = Math.floor(Math.abs((dark * 100) / total - 50) / 5);
+      p += k * 10;
+      return p;
+    };
+
+    const applyMask = (base, maskId) =>
+      base.map((row, r) =>
+        row.map((v, c) => {
+          if (isFn[r][c]) return v;
+          return maskFns[maskId](r, c) ? !v : v;
+        })
+      );
+
+    const formatBits = (maskId) => {
+      const levelL = 0b01;
+      const data5 = (levelL << 3) | maskId;
+      let bitsVal = data5 << 10;
+      const g = 0x537;
+      for (let i = 14; i >= 10; i -= 1) {
+        if ((bitsVal >> i) & 1) bitsVal ^= g << (i - 10);
+      }
+      return ((data5 << 10) | (bitsVal & 0x3ff)) ^ 0x5412;
+    };
+
+    const drawFormatBits = (grid, bitsVal) => {
+      const bit = (i) => ((bitsVal >> i) & 1) === 1;
+      const a = [
+        [8, 0],
+        [8, 1],
+        [8, 2],
+        [8, 3],
+        [8, 4],
+        [8, 5],
+        [8, 7],
+        [8, 8],
+        [7, 8],
+        [5, 8],
+        [4, 8],
+        [3, 8],
+        [2, 8],
+        [1, 8],
+        [0, 8]
+      ];
+      const b = [
+        [size - 1, 8],
+        [size - 2, 8],
+        [size - 3, 8],
+        [size - 4, 8],
+        [size - 5, 8],
+        [size - 6, 8],
+        [size - 7, 8],
+        [size - 8, 8],
+        [8, size - 8],
+        [8, size - 7],
+        [8, size - 6],
+        [8, size - 5],
+        [8, size - 4],
+        [8, size - 3],
+        [8, size - 2]
+      ];
+      for (let i = 0; i < 15; i += 1) {
+        const [r1, c1] = a[i];
+        const [r2, c2] = b[i];
+        grid[r1][c1] = bit(i);
+        grid[r2][c2] = bit(i);
+      }
+    };
+
+    let bestGrid = null;
+    let bestPenalty = Infinity;
+    for (let maskId = 0; maskId < 8; maskId += 1) {
+      const g = applyMask(modules, maskId);
+      drawFormatBits(g, formatBits(maskId));
+      const p = calcPenalty(g);
+      if (p < bestPenalty) {
+        bestPenalty = p;
+        bestGrid = g;
+      }
+    }
+    return bestGrid;
+  }
+
+  function qrMatrixToSvgDataUrl(matrix) {
+    if (!matrix || !matrix.length) return "";
+    const size = matrix.length;
+    const margin = 2;
+    const viewSize = size + margin * 2;
+    let cells = "";
+    for (let r = 0; r < size; r += 1) {
+      for (let c = 0; c < size; c += 1) {
+        if (matrix[r][c]) cells += `<rect x="${c + margin}" y="${r + margin}" width="1" height="1"/>`;
+      }
+    }
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewSize} ${viewSize}" shape-rendering="crispEdges">` +
+      `<rect width="100%" height="100%" fill="#fff"/>` +
+      `<g fill="#000">${cells}</g></svg>`;
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  }
+
   function setLoadingProgress(nextProgress, text) {
     const safe = clamp(Math.round(nextProgress), 0, 100);
     loadingProgress = Math.max(loadingProgress, safe);
@@ -322,6 +643,38 @@
     fallbackBtn.textContent = "Buka Form di Tab Baru";
     fallbackWrap.appendChild(fallbackBtn);
 
+    const printAccess = document.createElement("div");
+    printAccess.className = "print-form-access";
+
+    const printAccessTitle = document.createElement("h3");
+    printAccessTitle.textContent = "Akses Form Pendaftaran";
+
+    const formUrl = String(SITE.googleFormUrl || "").trim();
+    const printAccessLink = document.createElement("a");
+    printAccessLink.className = "print-form-url";
+    printAccessLink.href = formUrl || "#";
+    printAccessLink.target = "_blank";
+    printAccessLink.rel = "noopener noreferrer";
+    printAccessLink.textContent = formUrl || "URL form belum diatur";
+
+    const qrImg = document.createElement("img");
+    qrImg.className = "print-form-qr";
+    qrImg.alt = "QR code form pendaftaran";
+    qrImg.loading = "lazy";
+    if (formUrl) {
+      const matrix = createQrMatrixV3L(formUrl);
+      const qrDataUrl = qrMatrixToSvgDataUrl(matrix);
+      if (qrDataUrl) {
+        qrImg.src = qrDataUrl;
+      } else {
+        qrImg.style.display = "none";
+      }
+    } else {
+      qrImg.style.display = "none";
+    }
+
+    printAccess.append(printAccessTitle, printAccessLink, qrImg);
+
     const actionsWrap = document.createElement("div");
     actionsWrap.className = "share-actions";
 
@@ -364,7 +717,7 @@
 
     actionsWrap.append(shareTitle, actionGrid);
 
-    formContent.append(formPill, formTitle, formDesc, frameWrap, fallbackWrap, actionsWrap);
+    formContent.append(formPill, formTitle, formDesc, frameWrap, fallbackWrap, printAccess, actionsWrap);
     formSection.append(formBg, formOverlay, formContent);
     frag.appendChild(formSection);
 
@@ -1174,10 +1527,12 @@
           document.body.classList.remove("print-slides");
         };
         window.addEventListener("afterprint", clear, { once: true });
-        setTimeout(() => {
-          window.print();
-          setTimeout(clear, 1500);
-        }, 70);
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            window.print();
+            setTimeout(clear, 1500);
+          });
+        });
       });
     }
   }
