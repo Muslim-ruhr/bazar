@@ -1,7 +1,7 @@
 (function () {
   const SITE = {
     title: "Bazaar Muslim Ruhr",
-    subtitle: "Lebaran Idul Fitri 2026",
+    subtitle: "Idul Fitri 2026",
     googleFormUrl: "https://forms.gle/n2jsDC3xkXYszFY58",
     sourceCodeUrl: "https://github.com/Muslim-ruhr/bazar",
     licenseUrl: "https://github.com/Muslim-ruhr/bazar/blob/main/LICENSE"
@@ -10,8 +10,8 @@
   const STALLS = [
     {
       label: "Muslim Ruhr Mempersembahkan",
-      title: "Bazar Jajanan Indonesia",
-      subtitle: "Makanan, Minuman segar, Cendramata dan jajanan khar tanah air favorit keluarga.",
+      title: "Bazaar Idul Fitri 1447H",
+      subtitle: "Duisburg, Rhein-Ruhr, Jerman",
       description:
         "Buka booth Jualan/bisnis Anda di area paling ramai pengunjung. Cocok untuk souvenir, makanan menu manis, gurih, dan minuman kekinian saat momen lebaran.",
       background: "assets/bg-stall-1.jpg",

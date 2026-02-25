@@ -68,7 +68,7 @@
       h2.textContent = stall.title || `Stall ${index + 1}`;
 
       const h3 = document.createElement("h3");
-      h3.textContent = index === 0 ? siteSubtitle : stall.subtitle || "Deskripsi singkat stall.";
+      h3.textContent = stall.subtitle || "Deskripsi singkat stall.";
 
       const p = document.createElement("p");
       p.textContent = stall.description || "Lengkapi deskripsi stall di data/stalls.js";

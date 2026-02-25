@@ -433,6 +433,16 @@ body.is-loading {
   text-align: center;
 }
 
+.section-content.form-content.text-normal .section-cta {
+  display: flex;
+  justify-content: center;
+}
+
+.section-content.form-content.text-normal .section-cta .cta-btn {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .form-content h2 {
   max-width: 14ch;
 }
@@ -1144,6 +1154,13 @@ body.pdf-modal-open {
 
   .section-content p {
     max-width: 26ch;
+  }
+
+  .section-content.form-content.text-normal p,
+  .section-content.form-content.text-normal span,
+  .section-content.form-content.text-normal h2,
+  .section-content.form-content.text-normal .section-cta {
+    min-width: 100% !important;
   }
 
   .festival-section.stop-left .section-content {
