@@ -22,7 +22,9 @@
   const SITE = window.SITE || {
     title: "Bazaar Marketplace",
     subtitle: "Idul Fitri Festival 2026",
-    googleFormUrl: "https://forms.gle/REPLACE_ME"
+    googleFormUrl: "https://forms.gle/REPLACE_ME",
+    sourceCodeUrl: "https://github.com/Muslim-ruhr/Bazar",
+    licenseUrl: "https://github.com/Muslim-ruhr/Bazar/blob/main/LICENSE"
   };
   const STALLS = Array.isArray(window.STALLS) ? window.STALLS : [];
   let sectionElements = [];
@@ -396,7 +398,24 @@
 
     actionsWrap.append(shareTitle, actionGrid);
 
-    formContent.append(formPill, formTitle, formDesc, frameWrap, fallbackWrap, printAccess, actionsWrap);
+    const footerLinks = document.createElement("p");
+    footerLinks.className = "footer-links";
+    const sourceUrl = String(SITE.sourceCodeUrl || "").trim();
+    const licenseUrl = String(SITE.licenseUrl || "").trim();
+    const sourceAnchor = document.createElement("a");
+    sourceAnchor.href = sourceUrl || "#";
+    sourceAnchor.target = "_blank";
+    sourceAnchor.rel = "noopener noreferrer";
+    sourceAnchor.textContent = "Source-Code";
+    const separator = document.createTextNode(" • ");
+    const licenseAnchor = document.createElement("a");
+    licenseAnchor.href = licenseUrl || "#";
+    licenseAnchor.target = "_blank";
+    licenseAnchor.rel = "noopener noreferrer";
+    licenseAnchor.textContent = "License";
+    footerLinks.append(sourceAnchor, separator, licenseAnchor);
+
+    formContent.append(formPill, formTitle, formDesc, frameWrap, fallbackWrap, printAccess, actionsWrap, footerLinks);
     formSection.append(formBg, formOverlay, formContent);
     frag.appendChild(formSection);
 

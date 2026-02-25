@@ -2,7 +2,9 @@
   const SITE = {
     title: "Bazaar Muslim Ruhr",
     subtitle: "Lebaran Idul Fitri 2026",
-    googleFormUrl: "https://forms.gle/n2jsDC3xkXYszFY58"
+    googleFormUrl: "https://forms.gle/n2jsDC3xkXYszFY58",
+    sourceCodeUrl: "https://github.com/Muslim-ruhr/bazar",
+    licenseUrl: "https://github.com/Muslim-ruhr/bazar/blob/main/LICENSE"
   };
 
   const STALLS = [

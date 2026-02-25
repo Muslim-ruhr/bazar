@@ -105,16 +105,28 @@ Dampak otomatis:
 - URL form di halaman terakhir PDF,
 - QR code.
 
-### 3. Ubah Tampilan Section Stall
+### 3. Ubah URL Source Code dan License (Footer)
+
+Edit `data/stalls.js` pada object `SITE`:
+
+```js
+sourceCodeUrl: "https://github.com/<org>/<repo>",
+licenseUrl: "https://github.com/<org>/<repo>/blob/main/LICENSE"
+```
+
+Dampak otomatis:
+- link pendek `Source • License` di footer section terakhir halaman.
+
+### 4. Ubah Tampilan Section Stall
 
 Edit `components/stall-slide.js` jika ingin ubah struktur HTML card stall.
 
-### 4. Ubah Share Text / Network
+### 5. Ubah Share Text / Network
 
 Edit `main.js` (bagian `initShareAndPdfActions`) untuk teks campaign.
 Edit `modules/share-actions.js` jika ingin menambah/mengubah network.
 
-### 5. Ubah Pipeline PDF
+### 6. Ubah Pipeline PDF
 
 Edit `modules/pdf-export.js` untuk:
 - style dan flow modal,
@@ -122,7 +134,7 @@ Edit `modules/pdf-export.js` untuk:
 - cache key `sessionStorage`,
 - komposisi PDF (background/content/header/stamp).
 
-### 6. Ubah Animasi
+### 7. Ubah Animasi
 
 - `modules/motion-engine.js`: fungsi easing/smoothing.
 - `main.js`: state dan aturan pergerakan gerobak.
