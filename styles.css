@@ -121,8 +121,8 @@ body.is-loading {
   gap: 1rem;
   padding: 0.65rem 1.2rem;
   backdrop-filter: blur(8px);
-  background: color-mix(in hsl, #083224 72%, transparent);
-  border-bottom: 1px solid color-mix(in hsl, #ffe7a2 30%, transparent);
+  background: rgba(8, 50, 36, 0.72);
+  border-bottom: 1px solid rgba(255, 231, 162, 0.3);
   transition: transform 280ms ease, opacity 220ms ease;
 }
 
@@ -405,7 +405,7 @@ body.is-loading {
   max-width: 44ch;
   font-size: calc(clamp(0.98rem, 1.8vw, 1.15rem) * var(--content-font-scale));
   line-height: 1.6;
-  color: color-mix(in hsl, #ffffff 90%, #d4ffe9 10%);
+  color: #fbfffd;
   overflow-wrap: anywhere;
   word-break: break-word;
   hyphens: auto;
@@ -460,7 +460,55 @@ body.is-loading {
   padding: 0.3rem;
 }
 
+.pdf-export .form-embed-wrap {
+  display: none !important;
+}
+
+.pdf-export .form-content .section-cta {
+  display: none !important;
+}
+
+.pdf-export .share-actions {
+  display: none !important;
+}
+
+.pdf-export .print-form-access {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.pdf-export .print-form-access h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pdf-export .print-form-url {
+  text-decoration: underline;
+  font-size: 0.85rem;
+}
+
+.pdf-export .print-form-qr {
+  width: 140px;
+  height: 140px;
+  margin-top: 0.45rem;
+}
+
+.pdf-export .section-content {
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+.pdf-export .section-cta {
+  transform: none !important;
+  opacity: 1 !important;
+}
+
 .form-embed-wrap {
+  position: relative;
   width: min(100%, 860px);
   margin-top: 1rem;
   border-radius: 18px;
@@ -476,6 +524,29 @@ body.is-loading {
   min-height: clamp(420px, 68vh, 760px);
   border: 0;
   background: #ffffff;
+}
+
+.form-embed-wrap.is-loading::before,
+.form-embed-wrap.is-error::before {
+  content: "Menyiapkan form pendaftaran...";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.95rem;
+  color: #f8f3e8;
+  background: linear-gradient(135deg, rgba(8, 28, 33, 0.74), rgba(12, 89, 65, 0.62));
+}
+
+.form-embed-wrap.is-slow.is-loading::before {
+  content: "Koneksi lambat. Form masih dimuat...";
+}
+
+.form-embed-wrap.is-error::before {
+  content: "Form gagal dimuat. Gunakan tombol 'Buka Form di Tab Baru'.";
+  background: linear-gradient(135deg, rgba(64, 20, 20, 0.75), rgba(89, 42, 12, 0.68));
 }
 
 .share-actions {
@@ -801,6 +872,96 @@ body.low-power .topbar {
     0 10px 22px rgba(0, 0, 0, 0.35),
     inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   transition: transform 220ms ease, opacity 180ms ease, visibility 0ms linear 220ms;
+}
+
+body.pdf-modal-open {
+  overflow: hidden;
+}
+
+.pdf-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  background: rgba(7, 18, 20, 0.7);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.pdf-modal.is-open {
+  display: flex;
+}
+
+.pdf-modal-dialog {
+  width: min(96vw, 1100px);
+  height: min(92vh, 900px);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(8, 28, 33, 0.95);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 22px 40px rgba(0, 0, 0, 0.45);
+}
+
+.pdf-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.pdf-modal-actions {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.pdf-modal-status {
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.9rem;
+  color: #f8f3e8;
+  background: linear-gradient(90deg, rgba(20, 95, 130, 0.34), rgba(29, 139, 95, 0.28));
+}
+
+.pdf-modal-progress {
+  width: 100%;
+  height: 9px;
+  margin-top: 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.pdf-modal-progress-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffd166, #f8c95b, #ffec9e);
+  box-shadow: 0 0 10px rgba(248, 201, 91, 0.55);
+  transition: width 220ms ease;
+}
+
+.pdf-modal-progress-meta {
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  color: rgba(255, 248, 232, 0.9);
+}
+
+.pdf-modal-actions .is-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+#pdfModalFrame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #f3f4f6;
 }
 
 .back-to-top.is-visible {
