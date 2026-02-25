@@ -8,6 +8,7 @@
   --green: #1d8b5f;
   --topbar-h: 78px;
   --backtop-space: 72px;
+  --section-v-space: clamp(1rem, 3vh, 2rem);
 }
 
 * {
@@ -252,9 +253,10 @@ body.is-loading {
 }
 
 .section-content {
+  --content-font-scale: 1;
   width: min(100%, 1020px);
   margin: 0 auto;
-  min-height: 100vh;
+  min-height: calc(100vh - (var(--section-v-space) * 2));
   padding: clamp(1rem, 2.2vh, 1.5rem) 1.2rem clamp(1rem, 2.6vh, 1.8rem);
   justify-content: center;
   display: flex;
@@ -361,43 +363,52 @@ body.is-loading {
 .section-content h2 {
   margin: 0.8rem 0 0;
   font-family: "Baloo 2", system-ui;
-  font-size: clamp(2.2rem, 8vw, 5.6rem);
+  font-size: calc(clamp(2.2rem, 8vw, 5.6rem) * var(--content-font-scale));
   line-height: 0.95;
   max-width: 11ch;
   text-wrap: balance;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .section-content.text-giant h2 {
-  font-size: clamp(2.8rem, 10.2vw, 7.1rem);
+  font-size: calc(clamp(2.8rem, 10.2vw, 7.1rem) * var(--content-font-scale));
 }
 
 .section-content.text-compact h2 {
-  font-size: clamp(2rem, 7.1vw, 4.8rem);
+  font-size: calc(clamp(2rem, 7.1vw, 4.8rem) * var(--content-font-scale));
 }
 
 .section-content h3 {
   margin: 0.8rem 0 0;
-  font-size: clamp(1.1rem, 2.6vw, 1.55rem);
+  font-size: calc(clamp(1.1rem, 2.6vw, 1.55rem) * var(--content-font-scale));
   max-width: 28ch;
   font-weight: 700;
   text-wrap: balance;
   color: var(--muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .section-content.text-giant h3 {
-  font-size: clamp(1.15rem, 2.9vw, 1.85rem);
+  font-size: calc(clamp(1.15rem, 2.9vw, 1.85rem) * var(--content-font-scale));
 }
 
 .section-content.text-compact h3 {
-  font-size: clamp(1rem, 2.1vw, 1.35rem);
+  font-size: calc(clamp(1rem, 2.1vw, 1.35rem) * var(--content-font-scale));
 }
 
 .section-content p {
   margin: 1rem 0 0;
   max-width: 44ch;
-  font-size: clamp(0.98rem, 1.8vw, 1.15rem);
+  font-size: calc(clamp(0.98rem, 1.8vw, 1.15rem) * var(--content-font-scale));
   line-height: 1.6;
   color: color-mix(in hsl, #ffffff 90%, #d4ffe9 10%);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .section-content.text-compact p {
@@ -405,7 +416,7 @@ body.is-loading {
 }
 
 .section-content.text-giant p {
-  font-size: clamp(1rem, 1.9vw, 1.25rem);
+  font-size: calc(clamp(1rem, 1.9vw, 1.25rem) * var(--content-font-scale));
   max-width: 46ch;
 }
 
@@ -553,8 +564,8 @@ body.is-loading {
 }
 
 .hero .section-content {
-  height: calc(100vh - var(--topbar-h));
-  min-height: calc(100vh - var(--topbar-h));
+  height: calc(100vh - var(--topbar-h) - (var(--section-v-space) * 2));
+  min-height: calc(100vh - var(--topbar-h) - (var(--section-v-space) * 2));
   margin-top: var(--topbar-h);
   padding-top: clamp(1rem, 2.5vh, 1.8rem);
   padding-bottom: clamp(1rem, 2.5vh, 1.8rem);
@@ -790,7 +801,7 @@ body.low-power .topbar {
 }
 
 .festival-section.is-last .section-content {
-  min-height: calc(100vh - var(--backtop-space));
+  min-height: calc(100vh - var(--backtop-space) - (var(--section-v-space) * 2));
   padding-bottom: calc(var(--backtop-space) + 0.6rem);
   justify-content: center;
 }
@@ -870,6 +881,7 @@ body.low-power .topbar {
   :root {
     --topbar-h: 82px;
     --backtop-space: 78px;
+    --section-v-space: clamp(0.7rem, 2vh, 1.2rem);
   }
 
   .nav-dots {
@@ -948,7 +960,7 @@ body.low-power .topbar {
 
 @media (max-height: 780px) {
   .section-content h2 {
-    font-size: clamp(1.9rem, 7vw, 4rem);
+    font-size: calc(clamp(1.9rem, 7vw, 4rem) * var(--content-font-scale));
     margin-top: 0.55rem;
   }
 

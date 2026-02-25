@@ -27,6 +27,7 @@
   const STALLS = Array.isArray(window.STALLS) ? window.STALLS : [];
   let sectionElements = [];
   let loadingProgress = 0;
+  let fitTextRaf = 0;
 
   if (!STALLS.length) {
     app.innerHTML =
@@ -368,6 +369,42 @@
     frag.appendChild(formSection);
 
     app.appendChild(frag);
+  }
+
+  function fitSectionText(section) {
+    if (!section) return;
+    if (section.classList.contains("is-last")) return;
+    const content = section.querySelector(".section-content");
+    const card = section.querySelector(".section-card");
+    if (!content || !card) return;
+
+    content.style.setProperty("--content-font-scale", "1");
+
+    const styles = window.getComputedStyle(content);
+    const padTop = Number.parseFloat(styles.paddingTop) || 0;
+    const padBottom = Number.parseFloat(styles.paddingBottom) || 0;
+    const availableHeight = Math.max(140, content.clientHeight - padTop - padBottom - 6);
+
+    let scale = 1;
+    const minScale = 0.72;
+    while (card.getBoundingClientRect().height > availableHeight && scale > minScale) {
+      scale = Math.max(minScale, scale - 0.04);
+      content.style.setProperty("--content-font-scale", scale.toFixed(2));
+    }
+  }
+
+  function fitAllSectionsText() {
+    sectionElements.forEach((section) => fitSectionText(section));
+  }
+
+  function scheduleTextFit() {
+    if (fitTextRaf) {
+      window.cancelAnimationFrame(fitTextRaf);
+    }
+    fitTextRaf = window.requestAnimationFrame(() => {
+      fitTextRaf = 0;
+      fitAllSectionsText();
+    });
   }
 
   function buildDots() {
@@ -1170,6 +1207,12 @@
     setLoadingProgress(10, "Menyusun section...");
     buildSections();
     sectionElements = Array.from(document.querySelectorAll(".festival-section"));
+    scheduleTextFit();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        scheduleTextFit();
+      });
+    }
     buildDots();
 
     setLoadingProgress(24, "Memuat gambar...");
@@ -1210,5 +1253,6 @@
     motion.target = safeTransform(motion.target);
     renderState.xVw = clamp(renderState.xVw, xClamp.min, xClamp.max);
     renderState.yVh = clamp(renderState.yVh, yClamp.min, yClamp.max);
+    scheduleTextFit();
   });
 })();

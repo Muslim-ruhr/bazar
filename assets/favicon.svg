@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Favicon Bazar Idul Fitri Muslim Ruhr">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+    <linearGradient id="moon" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+  <circle cx="150" cy="104" r="54" fill="url(#moon)"/>
+  <circle cx="170" cy="92" r="46" fill="#0f766e"/>
+  <path d="M64 174h128v22H64z" fill="#f8fafc" opacity="0.95"/>
+  <path d="M80 166h18v30H80zM119 152h18v44h-18zM158 160h18v36h-18z" fill="#f8fafc"/>
+  <circle cx="98" cy="74" r="4" fill="#ffffff" opacity="0.9"/>
+  <circle cx="62" cy="98" r="3" fill="#ffffff" opacity="0.75"/>
+  <circle cx="188" cy="58" r="3" fill="#ffffff" opacity="0.85"/>
+</svg>
