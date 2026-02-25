@@ -255,18 +255,21 @@
     const safeTitle = String(title || "").trim();
     const safeSubtitle = String(subtitle || "").trim();
     const barH = 20;
-    pdf.setFillColor(255, 255, 255);
+    // Match web topbar mood: deep green with warm-gold accent.
+    pdf.setFillColor(8, 50, 36);
     pdf.rect(0, 0, pageW, barH, "F");
-    pdf.setDrawColor(220, 224, 230);
+    pdf.setFillColor(13, 63, 47);
+    pdf.rect(0, barH - 4.6, pageW, 4.6, "F");
+    pdf.setDrawColor(248, 201, 91);
     pdf.line(0, barH, pageW, barH);
 
-    pdf.setTextColor(22, 52, 76);
+    pdf.setTextColor(255, 244, 210);
     pdf.setFontSize(15);
     const titleLines = pdf.splitTextToSize(safeTitle || "Bazar Idul Fitri", pageW - 16);
     pdf.text(titleLines, pageW / 2, 8.2, { align: "center", baseline: "top" });
 
     if (safeSubtitle) {
-      pdf.setTextColor(60, 86, 108);
+      pdf.setTextColor(230, 245, 232);
       pdf.setFontSize(10);
       const subLines = pdf.splitTextToSize(safeSubtitle, pageW - 20);
       pdf.text(subLines, pageW / 2, 14.2, { align: "center", baseline: "top" });
