@@ -5,6 +5,7 @@
   let activePdfObjectUrl = "";
   const PDF_CACHE_DATA_KEY = "bazar_pdf_data_uri_v1";
   const PDF_CACHE_META_KEY = "bazar_pdf_meta_v1";
+  const PDF_LOADING_GEROBAK_FALLBACK = "assets/gerobak-bakso.png";
 
   function waitNextFrames(count) {
     return new Promise((resolve) => {
@@ -89,13 +90,22 @@
           </div>
           <div id="pdfModalProgressMeta" class="pdf-modal-progress-meta">0%</div>
         </div>
+        <div id="pdfModalLoading" class="pdf-modal-loading" hidden aria-hidden="true">
+          <div class="pdf-modal-loading-figure">
+            <img id="pdfModalLoadingGerobak" alt="" src="" />
+          </div>
+        </div>
         <iframe id="pdfModalFrame" title="PDF Preview"></iframe>
       </div>`;
     document.body.appendChild(modal);
+    syncModalLoadingGerobakSrc();
 
     const close = () => {
       modal.classList.remove("is-open");
+      modal.classList.remove("is-busy");
       document.body.classList.remove("pdf-modal-open");
+      const loading = document.getElementById("pdfModalLoading");
+      if (loading) loading.hidden = true;
       const frame = document.getElementById("pdfModalFrame");
       if (frame) frame.src = "about:blank";
       if (activePdfObjectUrl) {
@@ -113,14 +123,24 @@
     return modal;
   }
 
+  function syncModalLoadingGerobakSrc(preferredSrc) {
+    const loadingImg = document.getElementById("pdfModalLoadingGerobak");
+    if (!loadingImg) return;
+    const activeSrc = String(preferredSrc || "").trim() || String((document.querySelector("#gerobak img") || {}).src || "").trim() || PDF_LOADING_GEROBAK_FALLBACK;
+    if (loadingImg.getAttribute("src") !== activeSrc) {
+      loadingImg.setAttribute("src", activeSrc);
+    }
+  }
+
   function setModalStatus(text, isBusy, progressPct, pageIndex, pageTotal) {
     const modal = ensurePdfModal();
     const status = document.getElementById("pdfModalStatus");
+    const loading = document.getElementById("pdfModalLoading");
     const statusText = document.getElementById("pdfModalStatusText");
     const progressBar = document.getElementById("pdfModalProgressBar");
     const progressMeta = document.getElementById("pdfModalProgressMeta");
     const downloadLink = document.getElementById("pdfModalDownloadLink");
-    if (!status || !statusText || !progressBar || !progressMeta || !downloadLink) return;
+    if (!status || !statusText || !progressBar || !progressMeta || !downloadLink || !loading) return;
     statusText.textContent = text || "";
     const safePct = Math.max(0, Math.min(100, Math.round(Number(progressPct || 0))));
     progressBar.style.width = `${safePct}%`;
@@ -130,6 +150,9 @@
       progressMeta.textContent = `${safePct}%`;
     }
     status.hidden = !isBusy;
+    loading.hidden = !isBusy;
+    modal.classList.toggle("is-busy", !!isBusy);
+    if (isBusy) syncModalLoadingGerobakSrc();
     downloadLink.classList.toggle("is-disabled", !!isBusy);
     if (isBusy) {
       downloadLink.removeAttribute("href");
@@ -148,7 +171,7 @@
       activePdfObjectUrl = "";
     }
     activePdfObjectUrl = URL.createObjectURL(blob);
-    frame.src = activePdfObjectUrl;
+    frame.src = `${activePdfObjectUrl}#zoom=page-width&view=FitH&pagemode=none`;
     downloadLink.href = activePdfObjectUrl;
     downloadLink.download = filename;
     setModalStatus("", false, 100, 0, 0);

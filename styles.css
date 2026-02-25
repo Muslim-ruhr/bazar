@@ -926,6 +926,7 @@ body.pdf-modal-open {
 .pdf-modal-dialog {
   width: min(96vw, 1100px);
   height: min(92vh, 900px);
+  position: relative;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.24);
   background: rgba(8, 28, 33, 0.95);
@@ -950,11 +951,73 @@ body.pdf-modal-open {
 }
 
 .pdf-modal-status {
+  position: relative;
+  z-index: 4;
   padding: 0.55rem 0.8rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   font-size: 0.9rem;
   color: #f8f3e8;
   background: linear-gradient(90deg, rgba(20, 95, 130, 0.34), rgba(29, 139, 95, 0.28));
+}
+
+.pdf-modal-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(248, 201, 91, 0.2), rgba(4, 16, 21, 0.6) 48%, rgba(4, 16, 21, 0.8) 100%);
+}
+
+.pdf-modal-loading[hidden] {
+  display: none !important;
+}
+
+.pdf-modal-loading-figure {
+  position: relative;
+  width: clamp(160px, 28vw, 300px);
+  aspect-ratio: 4 / 5;
+  animation: pdf-gerobak-float 2.2s ease-in-out infinite;
+}
+
+.pdf-modal-loading-figure::before,
+.pdf-modal-loading-figure::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 56%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  transform: translate(-50%, -50%) scale(0.2);
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 214, 102, 0.88) 0%, rgba(255, 214, 102, 0.4) 38%, rgba(255, 214, 102, 0) 72%);
+  filter: blur(12px);
+  z-index: -1;
+}
+
+.pdf-modal-loading-figure::before {
+  animation: pdf-gerobak-glow-pulse 2.2s ease-out infinite;
+}
+
+.pdf-modal-loading-figure::after {
+  animation: pdf-gerobak-glow-pulse 2.2s ease-out infinite 1.1s;
+}
+
+.pdf-modal-loading-figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 14px rgba(255, 214, 102, 0.36))
+    drop-shadow(0 0 30px rgba(255, 214, 102, 0.22))
+    drop-shadow(0 18px 24px rgba(0, 0, 0, 0.42));
 }
 
 .pdf-modal-progress {
@@ -988,9 +1051,15 @@ body.pdf-modal-open {
 
 #pdfModalFrame {
   width: 100%;
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   border: 0;
   background: #f3f4f6;
+}
+
+.pdf-modal.is-busy #pdfModalFrame {
+  opacity: 0.22;
+  filter: saturate(0.88) blur(1px);
 }
 
 .back-to-top.is-visible {
@@ -1172,6 +1241,37 @@ body.pdf-modal-open {
     padding-right: calc(1rem + 108px);
     padding-left: 1rem;
   }
+
+  .pdf-modal {
+    padding: 0;
+  }
+
+  .pdf-modal-dialog {
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+    border: 0;
+  }
+
+  .pdf-modal-head {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .pdf-modal-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pdf-modal-actions .share-btn {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .pdf-modal-loading-figure {
+    width: clamp(132px, 50vw, 240px);
+  }
 }
 
 @media (max-height: 780px) {
@@ -1207,7 +1307,10 @@ body.pdf-modal-open {
   .cta-btn,
   .back-to-top,
   .section-content,
-  #gerobak {
+  #gerobak,
+  .pdf-modal-loading-figure,
+  .pdf-modal-loading-figure::before,
+  .pdf-modal-loading-figure::after {
     animation: none !important;
     transition: none !important;
   }
@@ -1228,6 +1331,30 @@ body.pdf-modal-open {
   .section-cta {
     transform: none !important;
     opacity: 1 !important;
+  }
+}
+
+@keyframes pdf-gerobak-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.015);
+  }
+}
+
+@keyframes pdf-gerobak-glow-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+  24% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.7);
+    opacity: 0;
   }
 }
 
