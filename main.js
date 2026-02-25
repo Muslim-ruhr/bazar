@@ -384,11 +384,12 @@
     const padTop = Number.parseFloat(styles.paddingTop) || 0;
     const padBottom = Number.parseFloat(styles.paddingBottom) || 0;
     const availableHeight = Math.max(140, content.clientHeight - padTop - padBottom - 6);
+    const targetHeight = Math.max(120, availableHeight * 0.82);
 
     let scale = 1;
-    const minScale = 0.72;
-    while (card.getBoundingClientRect().height > availableHeight && scale > minScale) {
-      scale = Math.max(minScale, scale - 0.04);
+    const minScale = 0.62;
+    while (card.getBoundingClientRect().height > targetHeight && scale > minScale) {
+      scale = Math.max(minScale, scale - 0.03);
       content.style.setProperty("--content-font-scale", scale.toFixed(2));
     }
   }
